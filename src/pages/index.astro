@@ -21,7 +21,7 @@ const notes = (await getCollection("notes"))
   <Section
     id="about"
     eyebrow="About"
-    title="Focused on useful, well-explained software."
+    title="Building useful web tools with product sense and technical depth."
     intro={profile.summary}
   >
     <div class="about-grid">
@@ -32,7 +32,7 @@ const notes = (await getCollection("notes"))
   <Section
     id="skills"
     eyebrow="Skills"
-    title="A practical toolkit for building and shipping."
+    title="A practical toolkit for building, researching, and sharing."
   >
     <div class="skills-grid">
       {profile.skillGroups.map((group) => (
@@ -44,8 +44,8 @@ const notes = (await getCollection("notes"))
   <Section
     id="projects"
     eyebrow="Projects"
-    title="Selected work and experiments."
-    intro="Sample portfolio cards show how real projects will be presented later."
+    title="Useful tools, algorithms, and technical experiments."
+    intro="A growing collection of web tools, algorithm projects, and technical explorations built around practical problems."
   >
     <div class="projects-grid">
       {projects.map((project) => <ProjectCard project={project} />)}
@@ -74,8 +74,8 @@ const notes = (await getCollection("notes"))
   <Section
     id="contact"
     eyebrow="Contact"
-    title="Have an idea worth exploring?"
-    intro="This sample contact section is ready for real GitHub, email, and social links."
+    title="Have a useful tool idea?"
+    intro="Open to conversations around web tools, technical products, workflow automation, AI applications, and algorithm-driven projects."
   >
     <ContactLinks links={profile.links} />
   </Section>
@@ -98,10 +98,15 @@ const notes = (await getCollection("notes"))
   }
 
   .skills-grid,
-  .projects-grid,
   .notes-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
     gap: 18px;
   }
 

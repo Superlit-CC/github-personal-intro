@@ -7,8 +7,9 @@ interface Props {
 }
 
 const {
-  title = "Alex Chen - Personal Portfolio",
-  description = "A sample personal portfolio and notes site built with Astro."
+  title = "Superlit - Useful Web Tools",
+  description =
+    "Independent developer building useful web tools, algorithm projects, and technical explorations."
 } = Astro.props;
 ---
 
@@ -23,7 +24,7 @@ const {
   </head>
   <body>
     <header class="site-header">
-      <a class="brand" href={withBasePath("/")}>Alex Chen</a>
+      <a class="brand" href={withBasePath("/")}>Superlit</a>
       <nav class="nav" aria-label="Primary navigation">
         <a href={withBasePath("#about")}>About</a>
         <a href={withBasePath("#projects")}>Projects</a>
@@ -35,14 +36,101 @@ const {
       <slot />
     </main>
     <footer class="site-footer">
-      <p>Built with Astro. Sample content ready to customize.</p>
+      <p>&copy; 2026 Superlit. Building useful web tools and sharing practical technology.</p>
     </footer>
+    <script is:inline>
+      const getAnchorGap = () => Math.min(48, Math.max(24, window.innerHeight * 0.05));
+      const getAnchorOffset = () => {
+        const header = document.querySelector(".site-header");
+        const headerHeight = header ? header.getBoundingClientRect().height : 0;
+        return headerHeight + getAnchorGap();
+      };
+
+      const updateAnchorScrollOffset = () => {
+        document.documentElement.style.setProperty(
+          "--anchor-scroll-offset",
+          `${getAnchorOffset()}px`
+        );
+      };
+
+      const getTargetFromHash = (hash) => {
+        const id = decodeURIComponent(hash.slice(1));
+        return id ? document.getElementById(id) : null;
+      };
+
+      const scrollToHash = (hash, behavior = "smooth") => {
+        const target = getTargetFromHash(hash);
+        if (!target) {
+          return;
+        }
+
+        updateAnchorScrollOffset();
+        const top = target.getBoundingClientRect().top + window.scrollY - getAnchorOffset();
+        window.scrollTo({
+          top: Math.max(0, top),
+          behavior
+        });
+      };
+
+      const scrollToCurrentHash = (behavior = "auto") => {
+        scrollToHash(window.location.hash, behavior);
+      };
+
+      const isSamePageHashLink = (link) => {
+        const url = new URL(link.href, window.location.href);
+        return (
+          url.origin === window.location.origin &&
+          url.pathname === window.location.pathname &&
+          url.hash.length > 1
+        );
+      };
+
+      document.addEventListener("click", (event) => {
+        const clicked = event.target instanceof Element ? event.target : null;
+        const link = clicked?.closest("a[href]");
+        if (!link || !isSamePageHashLink(link)) {
+          return;
+        }
+
+        event.preventDefault();
+        const url = new URL(link.href, window.location.href);
+
+        if (window.location.hash !== url.hash) {
+          history.pushState(null, "", url.hash);
+        } else {
+          history.replaceState(null, "", url.hash);
+        }
+
+        scrollToHash(url.hash);
+      });
+
+      updateAnchorScrollOffset();
+      requestAnimationFrame(() => scrollToCurrentHash());
+      window.addEventListener("resize", () => {
+        updateAnchorScrollOffset();
+        scrollToCurrentHash("auto");
+      });
+      window.addEventListener("hashchange", () => {
+        requestAnimationFrame(() => scrollToCurrentHash("auto"));
+      });
+
+      if ("ResizeObserver" in window) {
+        const header = document.querySelector(".site-header");
+        if (header) {
+          new ResizeObserver(() => {
+            updateAnchorScrollOffset();
+            scrollToCurrentHash("auto");
+          }).observe(header);
+        }
+      }
+    </script>
   </body>
 </html>
 
 <style is:global>
   :root {
     color-scheme: light;
+    --anchor-scroll-offset: 96px;
     --bg: #f7faf8;
     --surface: #ffffff;
     --surface-soft: #edf7f1;

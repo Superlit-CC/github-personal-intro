@@ -6,7 +6,7 @@ interface Props {
     stack: readonly string[];
     highlights: readonly string[];
     githubUrl: string;
-    demoUrl: string;
+    demoUrl?: string;
   };
 }
 
@@ -26,7 +26,7 @@ const { project } = Astro.props;
   </div>
   <div class="project-links">
     <a href={project.githubUrl}>GitHub</a>
-    <a href={project.demoUrl}>Demo</a>
+    {project.demoUrl ? <a href={project.demoUrl}>Demo</a> : null}
   </div>
 </article>
 

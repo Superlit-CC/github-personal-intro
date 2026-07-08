@@ -9,9 +9,9 @@ interface Props {
 const { id, eyebrow, title, intro } = Astro.props;
 ---
 
-<section class="section" id={id}>
+<section class="section">
   <div class="container">
-    <div class="section-heading">
+    <div class="section-heading" id={id}>
       {eyebrow && <p class="eyebrow">{eyebrow}</p>}
       <h2>{title}</h2>
       {intro && <p class="section-intro">{intro}</p>}
@@ -23,12 +23,12 @@ const { id, eyebrow, title, intro } = Astro.props;
 <style>
   .section {
     padding: 78px 0;
-    scroll-margin-top: 88px;
   }
 
   .section-heading {
     max-width: 720px;
     margin-bottom: 32px;
+    scroll-margin-top: var(--anchor-scroll-offset);
   }
 
   .eyebrow {
@@ -51,4 +51,5 @@ const { id, eyebrow, title, intro } = Astro.props;
     color: var(--muted);
     font-size: 1.05rem;
   }
+
 </style>

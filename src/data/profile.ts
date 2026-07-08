@@ -1,35 +1,31 @@
 export const profile = {
-  name: "Alex Chen",
-  role: "Full-stack developer",
-  tagline: "I build thoughtful web tools, automation workflows, and product experiments.",
+  name: "Superlit",
+  role: "Independent Developer",
+  tagline:
+    "I build useful and creative web tools, and share new technologies that make digital work smarter.",
   summary:
-    "A sample personal site for presenting work, writing notes, and making a GitHub profile feel more complete.",
+    "I create practical web tools for real-world workflows, combining full-stack engineering, algorithmic thinking, and hands-on exploration of emerging technologies.",
   about: [
-    "I enjoy turning fuzzy ideas into small, useful products. My work usually sits between frontend craft, backend reliability, and practical automation.",
-    "Recently I have been exploring AI-assisted workflows, developer tooling, and ways to make technical projects easier to explain.",
-    "This first version uses sample copy so the structure is ready before the personal details are finalized."
+    "I am an independent developer focused on building useful tools that solve concrete problems, improve workflows, and turn creative ideas into polished web experiences.",
+    "My work spans full-stack development, algorithm engineering, and AI-assisted product exploration. I care about making tools that are technically solid, clear, usable, and genuinely helpful.",
+    "Beyond building projects, I explore and share new technologies, developer tools, AI workflows, and practical methods that help people work and create more effectively."
   ],
   links: [
-    { label: "GitHub", href: "https://github.com/example" },
-    { label: "Email", href: "mailto:hello@example.com" },
-    { label: "Resume", href: "#" }
+    { label: "GitHub", href: "https://github.com/Superlit-CC" },
+    { label: "Email", href: "mailto:2762183147@qq.com" }
   ],
   skillGroups: [
     {
-      title: "Frontend",
-      skills: ["Astro", "React", "TypeScript", "CSS", "Accessibility"]
+      title: "Useful Web Tools",
+      skills: ["Web apps", "Productivity tools", "Workflow automation", "Product prototyping"]
     },
     {
-      title: "Backend",
-      skills: ["Node.js", "API design", "PostgreSQL", "Serverless"]
+      title: "Full-stack Development",
+      skills: ["Frontend engineering", "Backend APIs", "Data-driven systems", "Deployment"]
     },
     {
-      title: "Tools",
-      skills: ["GitHub Actions", "Testing", "Documentation", "CI/CD"]
-    },
-    {
-      title: "AI and Automation",
-      skills: ["Prompt design", "Workflow automation", "Data cleanup"]
+      title: "AI and Algorithms",
+      skills: ["AI applications", "Algorithm engineering", "Model workflows", "Technical research"]
     }
   ]
 } as const;
