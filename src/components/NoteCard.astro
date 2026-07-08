@@ -1,0 +1,77 @@
+---
+interface Props {
+  href: string;
+  title: string;
+  excerpt: string;
+  date: Date;
+  tags: readonly string[];
+}
+
+const { href, title, excerpt, date, tags } = Astro.props;
+const formattedDate = new Intl.DateTimeFormat("en", {
+  month: "short",
+  day: "numeric",
+  year: "numeric"
+}).format(date);
+---
+
+<article class="note-card">
+  <a href={href}>
+    <time datetime={date.toISOString()}>{formattedDate}</time>
+    <h3>{title}</h3>
+    <p>{excerpt}</p>
+    <div class="tags">
+      {tags.map((tag) => <span>{tag}</span>)}
+    </div>
+  </a>
+</article>
+
+<style>
+  .note-card a {
+    display: block;
+    height: 100%;
+    padding: 22px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    transition:
+      border-color 180ms ease,
+      transform 180ms ease,
+      box-shadow 180ms ease;
+  }
+
+  .note-card a:hover {
+    border-color: rgba(19, 124, 104, 0.48);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+  }
+
+  time {
+    color: var(--accent);
+    font-size: 0.85rem;
+    font-weight: 800;
+  }
+
+  h3 {
+    margin: 10px 0;
+    font-size: 1.2rem;
+  }
+
+  p {
+    margin: 0;
+    color: var(--muted);
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  .tags span {
+    color: var(--accent-strong);
+    font-size: 0.82rem;
+    font-weight: 800;
+  }
+</style>

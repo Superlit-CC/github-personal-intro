@@ -1,0 +1,91 @@
+---
+import { profile } from "../data/profile";
+
+const base = import.meta.env.BASE_URL;
+---
+
+<section class="hero">
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      <p class="eyebrow">Personal portfolio</p>
+      <h1>{profile.name}</h1>
+      <p class="role">{profile.role}</p>
+      <p class="tagline">{profile.tagline}</p>
+      <div class="button-row">
+        <a class="button primary" href={`${base}#projects`}>View projects</a>
+        {profile.links.map((link) => (
+          <a class="button" href={link.href}>{link.label}</a>
+        ))}
+      </div>
+    </div>
+    <div class="hero-visual" aria-label="Developer workspace illustration">
+      <img
+        src={`${base}profile-visual.png`}
+        alt="Modern developer workspace illustration"
+      />
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    padding: 72px 0 64px;
+  }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.04fr) minmax(320px, 0.82fr);
+    align-items: center;
+    gap: clamp(32px, 6vw, 72px);
+  }
+
+  .eyebrow {
+    margin: 0 0 14px;
+    color: var(--accent);
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(3.4rem, 8vw, 6.5rem);
+    line-height: 0.95;
+  }
+
+  .role {
+    margin: 18px 0 0;
+    color: var(--accent-warm);
+    font-size: 1.25rem;
+    font-weight: 800;
+  }
+
+  .tagline {
+    max-width: 660px;
+    margin: 18px 0 28px;
+    color: var(--muted);
+    font-size: clamp(1.1rem, 2vw, 1.45rem);
+  }
+
+  .hero-visual {
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+  }
+
+  .hero-visual img {
+    aspect-ratio: 4 / 3;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  @media (max-width: 860px) {
+    .hero-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

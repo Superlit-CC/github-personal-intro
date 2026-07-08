@@ -1,0 +1,44 @@
+---
+interface Props {
+  title: string;
+  skills: readonly string[];
+}
+
+const { title, skills } = Astro.props;
+---
+
+<article class="skill-group">
+  <h3>{title}</h3>
+  <div class="skills">
+    {skills.map((skill) => <span>{skill}</span>)}
+  </div>
+</article>
+
+<style>
+  .skill-group {
+    padding: 22px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+  }
+
+  h3 {
+    margin: 0 0 14px;
+    font-size: 1.05rem;
+  }
+
+  .skills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  span {
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: var(--surface-soft);
+    color: var(--accent-strong);
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+</style>

@@ -1,0 +1,26 @@
+---
+interface Props {
+  links: readonly {
+    label: string;
+    href: string;
+  }[];
+}
+
+const { links } = Astro.props;
+---
+
+<div class="contact-links">
+  {links.map((link, index) => (
+    <a class={index === 0 ? "button primary" : "button"} href={link.href}>
+      {link.label}
+    </a>
+  ))}
+</div>
+
+<style>
+  .contact-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+</style>
