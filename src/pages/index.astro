@@ -1,0 +1,133 @@
+---
+import { getCollection } from "astro:content";
+import Hero from "../components/Hero.astro";
+import Section from "../components/Section.astro";
+import SkillGroup from "../components/SkillGroup.astro";
+import ProjectCard from "../components/ProjectCard.astro";
+import NoteCard from "../components/NoteCard.astro";
+import ContactLinks from "../components/ContactLinks.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { profile } from "../data/profile";
+import { projects } from "../data/projects";
+
+const base = import.meta.env.BASE_URL;
+const notes = (await getCollection("notes"))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 3);
+---
+
+<BaseLayout>
+  <Hero />
+
+  <Section
+    id="about"
+    eyebrow="About"
+    title="Focused on useful, well-explained software."
+    intro={profile.summary}
+  >
+    <div class="about-grid">
+      {profile.about.map((paragraph) => <p>{paragraph}</p>)}
+    </div>
+  </Section>
+
+  <Section
+    id="skills"
+    eyebrow="Skills"
+    title="A practical toolkit for building and shipping."
+  >
+    <div class="skills-grid">
+      {profile.skillGroups.map((group) => (
+        <SkillGroup title={group.title} skills={group.skills} />
+      ))}
+    </div>
+  </Section>
+
+  <Section
+    id="projects"
+    eyebrow="Projects"
+    title="Selected work and experiments."
+    intro="Sample portfolio cards show how real projects will be presented later."
+  >
+    <div class="projects-grid">
+      {projects.map((project) => <ProjectCard project={project} />)}
+    </div>
+  </Section>
+
+  <Section
+    id="notes"
+    eyebrow="Notes"
+    title="Short writing from the workbench."
+    intro="A small notes area keeps the site ready for process notes, project retrospectives, and learning logs."
+  >
+    <div class="notes-grid">
+      {notes.map((note) => (
+        <NoteCard
+          href={`${base}notes/${note.slug}/`}
+          title={note.data.title}
+          excerpt={note.data.excerpt}
+          date={note.data.date}
+          tags={note.data.tags}
+        />
+      ))}
+    </div>
+  </Section>
+
+  <Section
+    id="contact"
+    eyebrow="Contact"
+    title="Have an idea worth exploring?"
+    intro="This sample contact section is ready for real GitHub, email, and social links."
+  >
+    <ContactLinks links={profile.links} />
+  </Section>
+</BaseLayout>
+
+<style>
+  .about-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .about-grid p {
+    margin: 0;
+    padding: 22px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--muted);
+  }
+
+  .skills-grid,
+  .projects-grid,
+  .notes-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .skills-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  @media (max-width: 980px) {
+    .about-grid,
+    .projects-grid,
+    .notes-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .skills-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .about-grid,
+    .skills-grid,
+    .projects-grid,
+    .notes-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
