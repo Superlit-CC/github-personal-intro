@@ -35,3 +35,22 @@
   - `EPERM: operation not permitted, mkdir 'C:\Users\Superlit\AppData\Roaming\astro\Config'`
   - `node_modules/@astrojs/telemetry/dist/config.js:56:8` stack trace
 - Conclusion: build failure is environmental permissions issue, not related to this Task 1 lockfile registry fix.
+
+## Fix update: 2026-07-08
+
+### Pages base-path wiring
+- Updated `astro.config.mjs` to keep `output: "static"` while using `defineConfig(({ command }) => ({ ... }))`.
+- Local dev now uses `base: "/"`.
+- Non-dev builds use `BASE_PATH` when provided, otherwise fall back to `/github-personal-intro/`.
+- Added `site: process.env.SITE_URL ?? "https://example.com"` so the config stays env-driven without hard-coding a personal GitHub username.
+- Updated `.github/workflows/deploy.yml` to pass:
+  - `BASE_PATH: /${{ github.event.repository.name }}/`
+  - `SITE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/`
+
+### Verification
+- Read back `astro.config.mjs` after the change; it now contains the `command`-aware base-path logic above.
+- Ran `npm run build`.
+- Exact failure output:
+  - `EPERM: operation not permitted, mkdir 'C:\Users\Superlit\AppData\Roaming\astro\Config'`
+  - `Location: D:\Dev\workspace\github-personal-intro\node_modules\@astrojs\telemetry\dist\config.js:56:8`
+- Why unrelated: the failure happens before Astro reaches the project build and is caused by the local environment blocking Astro telemetry config directory creation, not by the GitHub Pages base-path change.
