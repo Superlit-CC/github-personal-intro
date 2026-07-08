@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Alex Chen favicon">
+  <defs>
+    <linearGradient id="brand" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#137c68" />
+      <stop offset="100%" stop-color="#0d5f52" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="12" fill="url(#brand)" />
+  <text
+    x="50%"
+    y="50%"
+    text-anchor="middle"
+    dominant-baseline="central"
+    font-family="Arial, Helvetica, sans-serif"
+    font-size="36"
+    font-weight="700"
+    fill="#ffffff"
+  >
+    A
+  </text>
+</svg>
