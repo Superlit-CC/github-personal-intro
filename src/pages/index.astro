@@ -9,8 +9,7 @@ import ContactLinks from "../components/ContactLinks.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { profile } from "../data/profile";
 import { projects } from "../data/projects";
-
-const base = import.meta.env.BASE_URL;
+import { withBasePath } from "../lib/site-paths";
 const notes = (await getCollection("notes"))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
   .slice(0, 3);
@@ -62,7 +61,7 @@ const notes = (await getCollection("notes"))
     <div class="notes-grid">
       {notes.map((note) => (
         <NoteCard
-          href={`${base}notes/${note.slug}/`}
+          href={withBasePath(`/notes/${note.slug}/`)}
           title={note.data.title}
           excerpt={note.data.excerpt}
           date={note.data.date}

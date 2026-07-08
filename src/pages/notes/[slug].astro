@@ -1,8 +1,7 @@
 ---
 import { getCollection, render } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-
-const base = import.meta.env.BASE_URL;
+import { withBasePath } from "../../lib/site-paths";
 
 export async function getStaticPaths() {
   const notes = await getCollection("notes");
@@ -27,7 +26,7 @@ const formattedDate = new Intl.DateTimeFormat("en", {
   description={note.data.excerpt}
 >
   <article class="note-page container">
-    <a class="back-link" href={`${base}#notes`}>Back to notes</a>
+    <a class="back-link" href={withBasePath("#notes")}>Back to notes</a>
     <header>
       <p class="eyebrow">Note</p>
       <h1>{note.data.title}</h1>

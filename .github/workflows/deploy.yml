@@ -20,6 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       BASE_PATH: /${{ github.event.repository.name }}/
+      PUBLIC_BASE_PATH: /${{ github.event.repository.name }}/
       SITE_URL: https://${{ github.repository_owner }}.github.io
     steps:
       - name: Checkout

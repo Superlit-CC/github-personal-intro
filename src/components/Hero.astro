@@ -1,7 +1,6 @@
 ---
 import { profile } from "../data/profile";
-
-const base = import.meta.env.BASE_URL;
+import { withBasePath } from "../lib/site-paths";
 ---
 
 <section class="hero">
@@ -12,7 +11,7 @@ const base = import.meta.env.BASE_URL;
       <p class="role">{profile.role}</p>
       <p class="tagline">{profile.tagline}</p>
       <div class="button-row">
-        <a class="button primary" href={`${base}#projects`}>View projects</a>
+        <a class="button primary" href={withBasePath("#projects")}>View projects</a>
         {profile.links.map((link) => (
           <a class="button" href={link.href}>{link.label}</a>
         ))}
@@ -20,7 +19,7 @@ const base = import.meta.env.BASE_URL;
     </div>
     <div class="hero-visual" aria-label="Developer workspace illustration">
       <img
-        src={`${base}profile-visual.png`}
+        src={withBasePath("/profile-visual.png")}
         alt="Modern developer workspace illustration"
       />
     </div>
