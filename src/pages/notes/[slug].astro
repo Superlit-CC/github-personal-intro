@@ -17,7 +17,8 @@ const { Content } = await render(note);
 const formattedDate = new Intl.DateTimeFormat("en", {
   month: "long",
   day: "numeric",
-  year: "numeric"
+  year: "numeric",
+  timeZone: "UTC"
 }).format(note.data.date);
 ---
 
