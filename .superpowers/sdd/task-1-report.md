@@ -54,3 +54,19 @@
   - `EPERM: operation not permitted, mkdir 'C:\Users\Superlit\AppData\Roaming\astro\Config'`
   - `Location: D:\Dev\workspace\github-personal-intro\node_modules\@astrojs\telemetry\dist\config.js:56:8`
 - Why unrelated: the failure happens before Astro reaches the project build and is caused by the local environment blocking Astro telemetry config directory creation, not by the GitHub Pages base-path change.
+
+## Fix update: 2026-07-08
+
+### GitHub Pages SITE_URL tightening (Task follow-up)
+- Changed `.github/workflows/deploy.yml` so deploy env now sets:
+  - `BASE_PATH: /${{ github.event.repository.name }}/`
+  - `SITE_URL: https://${{ github.repository_owner }}.github.io`
+- Kept `astro.config.mjs` unchanged; it remains command-aware and env-driven:
+  - `base` uses `/` for `dev`, `BASE_PATH` for build.
+  - `site` uses `process.env.SITE_URL` with fallback.
+- Commit created: `ab21e34` on `main`.
+- Focused check: workflow env block now shows `SITE_URL` without repository suffix.
+- Focused `npm run build` result (local):
+  - `EPERM: operation not permitted, mkdir 'C:\Users\Superlit\AppData\Roaming\astro\Config'`
+  - `Location: D:\Dev\workspace\github-personal-intro\node_modules\@astrojs\telemetry\dist\config.js:56:8`
+  - `at get store ... notify (node_modules/astro/dist/cli/telemetry/index.js:5:19)`
