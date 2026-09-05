@@ -1,0 +1,50 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { profile } from "../data/profile";
+---
+<BaseLayout title={`关于 · ${profile.name}`} active="about">
+  <header class="page-heading"><p class="eyebrow">ABOUT</p><h1>关于我</h1><p>{profile.tagline}</p></header>
+  <div class="about page-content">
+    {profile.about.map((paragraph) => <p>{paragraph}</p>)}
+    <section><h2>当前关注</h2><p>{profile.focus}</p></section>
+    <section aria-labelledby="experience-heading">
+      <h2 id="experience-heading">工作与实习经历</h2>
+      <ul class="experiences">
+        {profile.experiences.map((experience) => <li><h3>{experience.company}</h3><p>{experience.description}</p></li>)}
+      </ul>
+    </section>
+    <section><h2>保持联系</h2><p>欢迎交流项目、技术，或者一个尚未成形的想法。</p><div class="contact">{profile.links.map((link) => <a href={link.href}>{link.label} ↗</a>)}</div></section>
+  </div>
+</BaseLayout>
+<style>
+  .about {
+    max-width: 720px;
+  }
+  .about p {
+    color: var(--muted);
+  }
+  section {
+    margin-top: 32px;
+  }
+  h2 {
+    margin-bottom: 14px;
+  }
+  .contact {
+    display: flex;
+    gap: 24px;
+  }
+  .experiences {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 0 20px;
+    border-left: 1px solid var(--border);
+  }
+  .experiences li + li { margin-top: 22px; }
+  .experiences h3 { font-size: 16px; margin-bottom: 4px; }
+  .experiences p { margin: 0; font-size: 14px; }
+  .contact a {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+</style>

@@ -1,7 +1,7 @@
 const EXTERNAL_URL_PATTERN = /^[a-zA-Z][a-zA-Z\d+\-.]*:/;
 
 export function getBasePath() {
-  const raw = import.meta.env.PUBLIC_BASE_PATH ?? "/";
+  const raw = import.meta.env.BASE_URL;
   const trimmed = raw.trim();
 
   if (!trimmed || trimmed === "/") {

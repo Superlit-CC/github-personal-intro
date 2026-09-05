@@ -1,14 +1,19 @@
 export const profile = {
   name: "Superlit",
-  role: "Independent Developer",
+  role: "Agent 开发工程师",
   tagline:
-    "I build useful and creative web tools, and share new technologies that make digital work smarter.",
+    "一名技术开发人员，从事 Agent 开发，关注 Agent 与 AI。",
   summary:
-    "I create practical web tools for real-world workflows, combining full-stack engineering, algorithmic thinking, and hands-on exploration of emerging technologies.",
+    "Superlit 的个人博客，记录 Agent 开发与 AI 探索，分享技术实践、项目复盘和学习笔记。",
   about: [
-    "I am an independent developer focused on building useful tools that solve concrete problems, improve workflows, and turn creative ideas into polished web experiences.",
-    "My work spans full-stack development, algorithm engineering, and AI-assisted product exploration. I care about making tools that are technically solid, clear, usable, and genuinely helpful.",
-    "Beyond building projects, I explore and share new technologies, developer tools, AI workflows, and practical methods that help people work and create more effectively."
+    "我是 Superlit，目前在国内某大厂从事技术开发，主要负责 Agent 开发相关工作。此前曾在百度工作，也曾在华为实习。",
+    "这个博客用来记录我在 Agent 与 AI 方向的学习、思考和技术实践，也分享项目中的经验与复盘。希望这些记录能帮助自己整理思路，也为遇到相似问题的人提供参考。"
+  ],
+  focus: "目前主要关注 Agent 与 AI，围绕 Agent 的设计、开发与实际应用持续学习和探索。",
+  experiences: [
+    { company: "国内某大厂", description: "目前 · 技术开发，从事 Agent 开发相关工作" },
+    { company: "百度", description: "曾任职" },
+    { company: "华为", description: "实习经历" }
   ],
   links: [
     { label: "GitHub", href: "https://github.com/Superlit-CC" },

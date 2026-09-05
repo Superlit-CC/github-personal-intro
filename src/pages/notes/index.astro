@@ -1,0 +1,12 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import NoteCard from "../../components/NoteCard.astro";
+import { profile } from "../../data/profile";
+import { withBasePath } from "../../lib/site-paths";
+const notes = (await getCollection("notes")).sort((a,b) => b.data.date.valueOf() - a.data.date.valueOf() || (a.data.series?.order ?? 0) - (b.data.series?.order ?? 0));
+---
+<BaseLayout title={`文章 · ${profile.name}`} active="notes">
+  <header class="page-heading"><p class="eyebrow">WRITING</p><h1>文章</h1><p>技术探索、项目复盘，以及学习路上的一些记录。</p></header>
+  <section class="page-content" aria-label="全部文章">{notes.map((note) => <NoteCard href={withBasePath(`/notes/${note.slug}/`)} {...note.data} />)}</section>
+</BaseLayout>

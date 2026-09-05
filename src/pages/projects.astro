@@ -1,0 +1,10 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import ProjectCard from "../components/ProjectCard.astro";
+import { projects } from "../data/projects";
+import { profile } from "../data/profile";
+---
+<BaseLayout title={`项目 · ${profile.name}`} active="projects">
+  <header class="page-heading"><p class="eyebrow">PROJECTS</p><h1>做过的项目</h1><p>从实际问题出发，探索工具、算法和新的可能。</p></header>
+  <section class="page-content" aria-label="全部项目">{projects.map((project) => <ProjectCard project={project} detailed />)}</section>
+</BaseLayout>

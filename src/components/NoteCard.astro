@@ -1,78 +1,45 @@
 ---
-interface Props {
-  href: string;
-  title: string;
-  excerpt: string;
-  date: Date;
-  tags: readonly string[];
-}
-
-const { href, title, excerpt, date, tags } = Astro.props;
-const formattedDate = new Intl.DateTimeFormat("en", {
-  month: "short",
-  day: "numeric",
-  year: "numeric",
-  timeZone: "UTC"
-}).format(date);
+interface Props { href: string; title: string; excerpt: string; date: Date; tags: readonly string[]; series?: { name: string; order: number }; }
+const { href, title, excerpt, date, tags, series } = Astro.props;
+const formattedDate = date.toISOString().slice(0, 10).replaceAll("-", ".");
 ---
-
-<article class="note-card">
-  <a href={href}>
-    <time datetime={date.toISOString()}>{formattedDate}</time>
-    <h3>{title}</h3>
-    <p>{excerpt}</p>
-    <div class="tags">
-      {tags.map((tag) => <span>{tag}</span>)}
-    </div>
-  </a>
+<article class="note-row">
+  <time datetime={date.toISOString()}>{formattedDate}</time>
+  <div><h3><a href={href}>{title}</a></h3><p>{excerpt}</p><div class="tags">{series && <span>{series.name} · {series.order === 0 ? "总览" : `第 ${series.order} 章`}</span>}{tags.map((tag) => <span>{tag}</span>)}</div></div>
 </article>
-
 <style>
-  .note-card a {
-    display: block;
-    height: 100%;
-    padding: 22px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--surface);
-    transition:
-      border-color 180ms ease,
-      transform 180ms ease,
-      box-shadow 180ms ease;
+  .note-row {
+    display: grid;
+    grid-template-columns: 105px minmax(0, 1fr);
+    gap: 18px;
+    padding: 24px 0;
+    border-bottom: 1px solid var(--border);
   }
-
-  .note-card a:hover {
-    border-color: rgba(19, 124, 104, 0.48);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow);
-  }
-
   time {
-    color: var(--accent);
-    font-size: 0.85rem;
-    font-weight: 800;
-  }
-
-  h3 {
-    margin: 10px 0;
-    font-size: 1.2rem;
-  }
-
-  p {
-    margin: 0;
+    font:
+      12px/1.8 ui-monospace,
+      Consolas,
+      monospace;
     color: var(--muted);
+    padding-top: 5px;
   }
-
-  .tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 16px;
+  h3 a {
+    color: var(--text);
+    overflow-wrap: anywhere;
   }
-
-  .tags span {
-    color: var(--accent-strong);
-    font-size: 0.82rem;
-    font-weight: 800;
+  h3 a:hover {
+    color: var(--accent);
+  }
+  p {
+    font-size: 14px;
+    color: var(--muted);
+    margin: 0 0 9px;
+  }
+  @media (max-width: 560px) {
+    .note-row {
+      grid-template-columns: 1fr;
+      gap: 6px;
+      padding: 20px 0;
+    }
   }
 </style>

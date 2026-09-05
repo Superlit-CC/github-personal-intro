@@ -1,137 +1,26 @@
 ---
 import { getCollection } from "astro:content";
 import Hero from "../components/Hero.astro";
-import Section from "../components/Section.astro";
-import SkillGroup from "../components/SkillGroup.astro";
 import ProjectCard from "../components/ProjectCard.astro";
 import NoteCard from "../components/NoteCard.astro";
-import ContactLinks from "../components/ContactLinks.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { profile } from "../data/profile";
 import { projects } from "../data/projects";
 import { withBasePath } from "../lib/site-paths";
-const notes = (await getCollection("notes"))
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
-  .slice(0, 3);
+const notes = (await getCollection("notes")).sort((a,b) => b.data.date.valueOf() - a.data.date.valueOf() || (a.data.series?.order ?? 0) - (b.data.series?.order ?? 0)).slice(0,3);
 ---
-
 <BaseLayout>
   <Hero />
-
-  <Section
-    id="about"
-    eyebrow="About"
-    title="Building useful web tools with product sense and technical depth."
-    intro={profile.summary}
-  >
-    <div class="about-grid">
-      {profile.about.map((paragraph) => <p>{paragraph}</p>)}
-    </div>
-  </Section>
-
-  <Section
-    id="skills"
-    eyebrow="Skills"
-    title="A practical toolkit for building, researching, and sharing."
-  >
-    <div class="skills-grid">
-      {profile.skillGroups.map((group) => (
-        <SkillGroup title={group.title} skills={group.skills} />
-      ))}
-    </div>
-  </Section>
-
-  <Section
-    id="projects"
-    eyebrow="Projects"
-    title="Useful tools, algorithms, and technical experiments."
-    intro="A growing collection of web tools, algorithm projects, and technical explorations built around practical problems."
-  >
-    <div class="projects-grid">
-      {projects.map((project) => <ProjectCard project={project} />)}
-    </div>
-  </Section>
-
-  <Section
-    id="notes"
-    eyebrow="Notes"
-    title="Short writing from the workbench."
-    intro="A small notes area keeps the site ready for process notes, project retrospectives, and learning logs."
-  >
-    <div class="notes-grid">
-      {notes.map((note) => (
-        <NoteCard
-          href={withBasePath(`/notes/${note.slug}/`)}
-          title={note.data.title}
-          excerpt={note.data.excerpt}
-          date={note.data.date}
-          tags={note.data.tags}
-        />
-      ))}
-    </div>
-  </Section>
-
-  <Section
-    id="contact"
-    eyebrow="Contact"
-    title="Have a useful tool idea?"
-    intro="Open to conversations around web tools, technical products, workflow automation, AI applications, and algorithm-driven projects."
-  >
-    <ContactLinks links={profile.links} />
-  </Section>
+  <section aria-labelledby="latest-writing">
+    <div class="section-heading"><h2 id="latest-writing">最新文章</h2><a href={withBasePath("/notes/")}>全部文章 →</a></div>
+    {notes.map((note) => <NoteCard href={withBasePath(`/notes/${note.slug}/`)} {...note.data} />)}
+  </section>
+  <section class="projects" aria-labelledby="selected-projects">
+    <div class="section-heading"><h2 id="selected-projects">精选项目</h2><a href={withBasePath("/projects/")}>全部项目 →</a></div>
+    {projects.slice(0,2).map((project) => <ProjectCard project={project} />)}
+  </section>
 </BaseLayout>
-
 <style>
-  .about-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 18px;
-  }
-
-  .about-grid p {
-    margin: 0;
-    padding: 22px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--surface);
-    color: var(--muted);
-  }
-
-  .skills-grid,
-  .notes-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 18px;
-  }
-
-  .projects-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
-    gap: 18px;
-  }
-
-  .skills-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-
-  @media (max-width: 980px) {
-    .about-grid,
-    .projects-grid,
-    .notes-grid {
-      grid-template-columns: 1fr 1fr;
-    }
-
-    .skills-grid {
-      grid-template-columns: 1fr 1fr;
-    }
-  }
-
-  @media (max-width: 640px) {
-    .about-grid,
-    .skills-grid,
-    .projects-grid,
-    .notes-grid {
-      grid-template-columns: 1fr;
-    }
+  .projects {
+    padding: 36px 0 28px;
   }
 </style>

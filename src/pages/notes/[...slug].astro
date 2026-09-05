@@ -1,0 +1,214 @@
+---
+import { getCollection, render } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { profile } from "../../data/profile";
+import { withBasePath } from "../../lib/site-paths";
+export async function getStaticPaths() {
+  return (await getCollection("notes")).map((note) => ({ params: { slug: note.slug }, props: { note } }));
+}
+const { note } = Astro.props;
+const { Content, headings } = await render(note);
+const contents = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
+const series = note.data.series;
+const chapters = series
+  ? (await getCollection("notes"))
+      .filter((entry) => entry.data.series?.name === series.name)
+      .sort((a, b) => a.data.series!.order - b.data.series!.order)
+  : [];
+const chapterIndex = chapters.findIndex((entry) => entry.slug === note.slug);
+const previous = chapters[chapterIndex - 1];
+const next = chapters[chapterIndex + 1];
+---
+<BaseLayout title={`${note.data.title} · ${profile.name}`} description={note.data.excerpt} active="notes">
+  <article class="note-page">
+    <a class="back-link" href={withBasePath("/notes/")}>← 全部文章</a>
+    <header class="article-heading">
+      <time datetime={note.data.date.toISOString()}>{note.data.date.toISOString().slice(0,10).replaceAll("-", ".")}</time>
+      <h1>{note.data.title}</h1><p>{note.data.excerpt}</p><div class="tags">{note.data.tags.map((tag) => <span>{tag}</span>)}</div>
+    </header>
+    {series && <aside class="series" aria-label="系列目录">
+      <p>{series.name} <span>· 系列文章</span></p>
+      <ol>{chapters.map((entry) => <li><a href={withBasePath(`/notes/${entry.slug}/`)} aria-current={entry.slug === note.slug ? "page" : undefined}>{entry.data.series!.order === 0 ? "总览" : `第 ${entry.data.series!.order} 章`} · {entry.data.title}</a></li>)}</ol>
+    </aside>}
+    {contents.length > 0 && <details class="toc"><summary>文章目录</summary><ul>{contents.map((heading) => <li class:list={{ nested: heading.depth === 3 }}><a href={`#${heading.slug}`}>{heading.text}</a></li>)}</ul></details>}
+    <div class="prose"><Content /></div>
+    <div class="article-footer">
+      {(previous || next) && <div class="chapter-links">
+        {previous && <a href={withBasePath(`/notes/${previous.slug}/`)}>← 上一篇：{previous.data.title}</a>}
+        {next && <a href={withBasePath(`/notes/${next.slug}/`)}>下一篇：{next.data.title} →</a>}
+      </div>}
+      <a href={withBasePath("/notes/")}>← 返回文章列表</a>
+    </div>
+  </article>
+</BaseLayout>
+<style>
+  .series {
+    margin-bottom: 28px;
+    padding: 18px 20px;
+    border-left: 2px solid var(--accent);
+    background: var(--surface-soft);
+    font-size: 14px;
+  }
+  .series p { margin: 0 0 10px; font-weight: 600; }
+  .series p span { color: var(--muted); font-weight: 400; }
+  .series ol { margin: 0; padding: 0; list-style: none; }
+  .series li + li { margin-top: 8px; }
+  .series a { display: block; overflow-wrap: anywhere; }
+  .series a[aria-current] { color: var(--text); font-weight: 600; text-decoration: underline; }
+  .chapter-links { display: grid; gap: 16px; margin-bottom: 24px; }
+  .note-page {
+    max-width: 720px;
+    margin: auto;
+    padding: 44px 0 48px;
+    min-width: 0;
+  }
+  .back-link,
+  .article-footer {
+    font-size: 13px;
+  }
+  .article-heading {
+    margin: 32px 0;
+    padding-bottom: 26px;
+    border-bottom: 1px solid var(--border);
+  }
+  time {
+    font:
+      12px/1.8 ui-monospace,
+      Consolas,
+      monospace;
+    color: var(--muted);
+  }
+  h1 {
+    margin-top: 14px;
+    overflow-wrap: anywhere;
+    line-height: 1.5;
+  }
+  .article-heading p {
+    color: var(--muted);
+  }
+  .toc {
+    margin-bottom: 28px;
+    padding: 14px 20px;
+    background: var(--surface-soft);
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  .toc summary {
+    cursor: pointer;
+  }
+  .toc ul {
+    list-style: none;
+    padding: 0;
+    margin: 12px 0 0;
+  }
+  .toc .nested {
+    padding-left: 18px;
+  }
+  .prose {
+    font-size: 17px;
+    line-height: 1.95;
+    overflow-wrap: anywhere;
+  }
+  .prose :global(svg[id^="mermaid"]) {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin: 24px auto;
+  }
+  .prose :global(h2) {
+    font-size: 25px;
+    margin: 36px 0 16px;
+  }
+  .prose :global(h3) {
+    font-size: 21px;
+    margin: 28px 0 12px;
+  }
+  .prose :global(h4) {
+    font-size: 18px;
+    margin: 24px 0 12px;
+  }
+  .prose :global(p) {
+    margin: 0 0 22px;
+  }
+  .prose :global(a) {
+    text-decoration: underline;
+  }
+  .prose :global(ul),
+  .prose :global(ol) {
+    padding-left: 24px;
+  }
+  .prose :global(li) {
+    margin-block: 6px;
+  }
+  .prose :global(blockquote) {
+    border-left: 3px solid var(--accent);
+    margin: 24px 0;
+    padding: 4px 0 4px 20px;
+    color: var(--muted);
+  }
+  .prose :global(blockquote p:last-child) {
+    margin: 0;
+  }
+  .prose :global(code) {
+    font-family: ui-monospace, Consolas, monospace;
+    font-size: 0.86em;
+    background: var(--surface-soft);
+    padding: 2px 5px;
+    border-radius: 3px;
+  }
+  .prose :global(pre) {
+    background: var(--surface-soft) !important;
+    padding: 20px;
+    overflow-x: auto;
+    border-radius: 5px;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  .prose :global(pre code) {
+    background: none;
+    padding: 0;
+    border-radius: 0;
+    font-size: inherit;
+  }
+  .prose :global(table) {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    border-collapse: collapse;
+    margin: 24px 0;
+    font-size: 15px;
+  }
+  .prose :global(th),
+  .prose :global(td) {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+  }
+  .prose :global(th) {
+    background: var(--surface-soft);
+  }
+  .prose :global(img) {
+    margin: 24px auto;
+  }
+  .prose :global(hr) {
+    border: 0;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+  .prose :global(:target) {
+    scroll-margin-top: 24px;
+  }
+  .article-footer {
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+    padding-top: 24px;
+  }
+  @media (max-width: 560px) {
+    .note-page {
+      padding-top: 30px;
+    }
+    .prose {
+      font-size: 16px;
+    }
+  }
+</style>
