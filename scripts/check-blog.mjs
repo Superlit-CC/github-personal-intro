@@ -33,7 +33,8 @@ assert.deepEqual(dates, [...dates].sort().reverse(), "Articles must be newest fi
 const seriesPath = "notes/pi-agent-kernel-guide/";
 const overview = await readFile(`dist/${seriesPath}00-overview/index.html`, "utf8");
 const chapter = await readFile(`dist/${seriesPath}01-unified-contract/index.html`, "utf8");
-for (const html of [overview, chapter]) {
+const chapterTwo = await readFile(`dist/${seriesPath}02-provider-routing/index.html`, "utf8");
+for (const html of [overview, chapter, chapterTwo]) {
   assert(/<svg[^>]*id="mermaid/.test(html), "Mermaid must render to SVG at build time");
   assert(!html.includes('class="language-mermaid"'), "Do not expose unrendered Mermaid code");
   assert(html.includes('role="graphics-document document"'), "Mermaid must have an accessible diagram role");
@@ -46,9 +47,21 @@ const overviewNext = [...overview.matchAll(/<a href="([^"]+)"[^>]*>下一篇/g)]
 const chapterPrevious = [...chapter.matchAll(/<a href="([^"]+)"[^>]*>← 上一篇/g)].map((match) => match[1]);
 assert.deepEqual(overviewNext, [`${base}${seriesPath}01-unified-contract/`], "Overview must link to chapter one");
 assert.deepEqual(chapterPrevious, [`${base}${seriesPath}00-overview/`], "Chapter one must link back to overview");
-assert(!chapter.includes(">下一篇："), "Do not link to unpublished chapters");
+const chapterNext = [...chapter.matchAll(/<a href="([^"]+)"[^>]*>下一篇/g)].map((match) => match[1]);
+const chapterTwoPrevious = [...chapterTwo.matchAll(/<a href="([^"]+)"[^>]*>← 上一篇/g)].map((match) => match[1]);
+assert.deepEqual(chapterNext, [`${base}${seriesPath}02-provider-routing/`], "Chapter one must link to chapter two");
+assert.deepEqual(chapterTwoPrevious, [`${base}${seriesPath}01-unified-contract/`], "Chapter two must link back to chapter one");
+assert(!chapterTwo.includes(">下一篇："), "Do not link to unpublished chapters");
+assert(overview.includes('href="../02-provider-routing/"'), "Overview must list chapter two as published");
+const chapterTwoDiagram = chapterTwo.match(/<svg[^>]*id="mermaid[\s\S]*?<\/svg>/)[0].replace(/<[^>]+>/g, "");
+for (const label of ["调用方", "models.complete()", "Models", "查找 Provider 并应用认证", "执行调用", "模型服务", "AssistantMessage"]) {
+  assert(chapterTwoDiagram.includes(label), `Missing chapter two SVG label: ${label}`);
+}
+for (const text of ["node labs/02-provider-routing.ts", "anthropic: hello", "openai: hello", "chapter 2 example passed"]) {
+  assert(chapterTwo.replace(/<[^>]+>/g, "").includes(text), `Preserve chapter two Lab instructions and output: ${text}`);
+}
 assert(chapter.includes("labs/01-model-call.ts") && chapter.includes("chapter 1 example passed"), "Preserve the original Lab instructions and expected output");
-assert(!/href="[^"]*\/labs\//i.test(overview + chapter), "Lab paths should remain text, not links");
+assert(!/href="[^"]*\/labs\//i.test(overview + chapter + chapterTwo), "Lab paths should remain text, not links");
 for (const slug of ["building-a-personal-site", "learning-in-public", "project-retrospectives"]) {
   assert(!pages.some((page) => page.includes(slug)), `Removed sample still published: ${slug}`);
 }
