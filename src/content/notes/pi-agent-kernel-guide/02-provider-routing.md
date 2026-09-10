@@ -109,7 +109,49 @@ stream(
 - `requestModel`：应用认证配置后，本次请求实际使用的模型；
 - `requestOptions`：合并调用方配置和认证信息后，本次请求实际使用的参数。
 
-`lazyStream()` 让认证准备和 Provider 调用在返回事件流后继续执行，不改变上述路由顺序。
+### 等待认证时，先把事件流交给调用方
+
+上面的 `Models.stream()` 需要立即返回事件流，但 `applyAuth()` 是异步操作。认证完成之前，还不能调用 `provider.stream()`，也就拿不到 Provider 的事件流。`lazyStream()` 负责连接这两个阶段：先返回一个外层事件流，准备完成后，再把 Provider 内层事件流的内容转发过来。
+
+这里的“外层”和“内层”只是相对于这次包装的称呼：外层是 `Models.stream()` 返回的对象，内层是准备完成后 `provider.stream()` 返回的对象。调用方始终持有同一个外层对象，无需在认证完成后更换它。
+
+下面是 [`api/lazy.ts` 中的实现](https://github.com/earendil-works/pi/blob/3fc3ef532b966b28b764af070d62302c0acab0d5/packages/ai/src/api/lazy.ts#L46-L61)，只省略了导出声明和类型标注：
+
+```ts
+function lazyStream(model, setup) {
+	const outer = new AssistantMessageEventStream();
+
+	setup()
+		.then((inner) => forwardStream(outer, inner))
+		.catch((error) => {
+			const message = createSetupErrorMessage(model, error);
+			outer.push({ type: "error", reason: "error", error: message });
+			outer.end(message);
+		});
+
+	return outer;
+}
+```
+
+`AssistantMessageEventStream` 就是前面方法声明返回的消息事件流类型。`setup` 是传入的准备函数，在 `Models.stream()` 中对应上面的 `async () => { ... }`：查找 Provider、等待认证，再返回 Provider 的事件流。
+
+执行到 `setup()` 时，准备工作已经启动；`lazyStream()` 没有等待它完成，而是继续执行 `return outer`。认证完成后，`setup()` 返回的 Promise 得到内层流 `inner`，随后调用 `forwardStream(outer, inner)`。因此，函数名中的 `lazy` 不表示“等调用方开始读取才启动请求”。
+
+[`forwardStream()`](https://github.com/earendil-works/pi/blob/3fc3ef532b966b28b764af070d62302c0acab0d5/packages/ai/src/api/lazy.ts#L31-L39) 的转发循环如下：
+
+```ts
+for await (const event of source) {
+	target.push(event);
+}
+```
+
+`source` 对应内层流，`target` 对应外层流。`for await` 按顺序等待并取出事件，每取出一条，`push()` 就将它交给外层流。循环结束后，源码还会结束外层流，并在内层提供 `result()` 时传递完整结果。这里不重新发起模型请求，也不改变事件内容。
+
+如果准备或转发失败，`catch` 分支用 `createSetupErrorMessage()` 将异常和模型信息整理成错误消息，向外层发送 `error` 事件并结束流，避免调用方一直等待。
+
+这层包装解决的是“同步返回事件流、异步准备请求”的衔接问题。Provider 的选择、认证和实际调用仍然保持上面的顺序。
+
+### 沿同一条路径等待完整回复
 
 等待完整回复的源码只做了一层调用。省略泛型和类型标注后，方法主体如下：
 
