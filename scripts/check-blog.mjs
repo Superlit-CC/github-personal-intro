@@ -37,7 +37,8 @@ const chapterTwo = await readFile(`dist/${seriesPath}02-provider-routing/index.h
 const chapterThree = await readFile(`dist/${seriesPath}03-bailian-provider/index.html`, "utf8");
 const chapterFour = await readFile(`dist/${seriesPath}04-streaming-text/index.html`, "utf8");
 const chapterFive = await readFile(`dist/${seriesPath}05-events-and-result/index.html`, "utf8");
-for (const html of [overview, chapter, chapterTwo, chapterThree, chapterFour, chapterFive]) {
+const chapterSix = await readFile(`dist/${seriesPath}06-agent-question-answer/index.html`, "utf8");
+for (const html of [overview, chapter, chapterTwo, chapterThree, chapterFour, chapterFive, chapterSix]) {
   assert(/<svg[^>]*id="mermaid/.test(html), "Mermaid must render to SVG at build time");
   assert(!html.includes('class="language-mermaid"'), "Do not expose unrendered Mermaid code");
   assert(html.includes('role="graphics-document document"'), "Mermaid must have an accessible diagram role");
@@ -66,7 +67,21 @@ const chapterFourNext = [...chapterFour.matchAll(/<a href="([^"]+)"[^>]*>下一�
 const chapterFivePrevious = [...chapterFive.matchAll(/<a href="([^"]+)"[^>]*>← 上一篇/g)].map((match) => match[1]);
 assert.deepEqual(chapterFourNext, [`${base}${seriesPath}05-events-and-result/`], "Chapter four must link to chapter five");
 assert.deepEqual(chapterFivePrevious, [`${base}${seriesPath}04-streaming-text/`], "Chapter five must link back to chapter four");
-assert(!chapterFive.includes(">下一篇："), "Do not link to unpublished chapters");
+const chapterFiveNext = [...chapterFive.matchAll(/<a href="([^"]+)"[^>]*>下一篇/g)].map((match) => match[1]);
+const chapterSixPrevious = [...chapterSix.matchAll(/<a href="([^"]+)"[^>]*>← 上一篇/g)].map((match) => match[1]);
+assert.deepEqual(chapterFiveNext, [`${base}${seriesPath}06-agent-question-answer/`], "Chapter five must link to chapter six");
+assert.deepEqual(chapterSixPrevious, [`${base}${seriesPath}05-events-and-result/`], "Chapter six must link back to chapter five");
+assert(!chapterSix.includes(">下一篇："), "Do not link to unpublished chapters");
+assert(overview.includes('href="../06-agent-question-answer/"'), "Overview must list chapter six as published");
+const chapterSixText = chapterSix.replace(/<[^>]+>/g, "");
+for (const text of ["npm install", "node labs/06-agent-question-answer.ts", "request 1 roles: user", "complete reply:", "stopReason: stop", "chapter 6 Agent question and answer passed"]) {
+  assert(chapterSixText.includes(text), `Preserve chapter six Lab instructions and output: ${text}`);
+}
+const chapterSixDiagram = chapterSix.match(/<svg[^>]*id="mermaid[\s\S]*?<\/svg>/)[0].replace(/<[^>]+>/g, "");
+for (const label of ["调用方", "Agent", "前文的模型调用封装", "百炼模型", "提交输入", "通过传入的函数调用模型", "发送请求", "返回回复", "传递模型回复事件", "回复过程与完整消息"]) {
+  assert(chapterSixDiagram.includes(label), `Missing chapter six SVG label: ${label}`);
+}
+assert(overview.includes("第 7～11 章尚未收录"), "Overview must preserve the revised chapter plan");
 assert(overview.includes('href="../05-events-and-result/"'), "Overview must list chapter five as published");
 const chapterFiveDiagram = chapterFive.match(/<svg[^>]*id="mermaid[\s\S]*?<\/svg>/)[0].replace(/<[^>]+>/g, "");
 for (const label of ["百炼协议适配器", "累积消息并发送事件", "沿已有调用路径转发", "调用方持有的事件流", "for await：逐条事件", "显示端", "追加新增文字", "await events.result()", "结果等待方", "取得完整消息并判断状态"]) {
@@ -103,7 +118,7 @@ for (const text of ["node labs/02-provider-routing.ts", "anthropic: hello", "ope
   assert(chapterTwo.replace(/<[^>]+>/g, "").includes(text), `Preserve chapter two Lab instructions and output: ${text}`);
 }
 assert(chapter.includes("labs/01-model-call.ts") && chapter.includes("chapter 1 example passed"), "Preserve the original Lab instructions and expected output");
-assert(!/href="[^"]*\/labs\//i.test(overview + chapter + chapterTwo + chapterThree + chapterFour + chapterFive), "Lab paths should remain text, not links");
+assert(!/href="[^"]*\/labs\//i.test(overview + chapter + chapterTwo + chapterThree + chapterFour + chapterFive + chapterSix), "Lab paths should remain text, not links");
 for (const slug of ["building-a-personal-site", "learning-in-public", "project-retrospectives"]) {
   assert(!pages.some((page) => page.includes(slug)), `Removed sample still published: ${slug}`);
 }
