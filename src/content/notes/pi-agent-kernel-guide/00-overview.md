@@ -58,7 +58,7 @@ flowchart LR
 
 | 章 | 本章只解决什么 | 学完可以做什么 |
 |---|---|---|
-| 8. 让 Agent 调用工具 | 根据模型返回的工具请求继续主循环 | Agent 从“回答”变成“行动” |
+| [8. 让 Agent 调用工具](../08-tool-calling/) | 根据模型返回的工具请求继续主循环 | Agent 从“回答”变成“行动” |
 | 9. 解析并校验工具参数 | 处理参数分片和不可信输入 | 只有通过校验的参数才能执行 |
 
 读完这一阶段，Agent 可以安全地把模型输出变成工具操作。
@@ -86,8 +86,8 @@ flowchart LR
 
 ## 本站收录进度
 
-- 已收录：本篇总览、[第 1 章：定义一次模型调用](../01-unified-contract/)、[第 2 章：选择并调用不同模型服务](../02-provider-routing/)、[第 3 章：接入阿里云百炼](../03-bailian-provider/)、[第 4 章：让模型回复逐字显示](../04-streaming-text/)、[第 5 章：让事件流同时提供过程和结果](../05-events-and-result/)、[第 6 章：让 Agent 完成一次问答](../06-agent-question-answer/)、[第 7 章：保存消息并连续对话](../07-conversation-history/)
-- 第 8～11 章尚未收录，待更新，后续按章节顺序更新。
+- 已收录：本篇总览、[第 1 章：定义一次模型调用](../01-unified-contract/)、[第 2 章：选择并调用不同模型服务](../02-provider-routing/)、[第 3 章：接入阿里云百炼](../03-bailian-provider/)、[第 4 章：让模型回复逐字显示](../04-streaming-text/)、[第 5 章：让事件流同时提供过程和结果](../05-events-and-result/)、[第 6 章：让 Agent 完成一次问答](../06-agent-question-answer/)、[第 7 章：保存消息并连续对话](../07-conversation-history/)、[第 8 章：让 Agent 调用工具](../08-tool-calling/)
+- 第 9～11 章尚未收录，待更新，后续按章节顺序更新。
 
 推荐先阅读总览，再进入第 1 章。
 
