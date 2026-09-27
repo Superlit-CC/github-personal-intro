@@ -12,6 +12,8 @@ series:
   order: 3
 ---
 
+> 上一章：[选择并调用不同模型服务](../02-provider-routing/) · 系列导读：[从一次模型调用到 Agent 内核](../00-overview/) · 下一章：[让模型回复逐字显示](../04-streaming-text/)
+
 上一章已经能根据 `model.provider` 选择 Provider，但示例 Provider 只返回固定消息。本章把同一个调用入口接到阿里云百炼：读者将学会区分“选择哪家模型服务”和“使用哪种通信协议”，并用 pi 现有的协议实现完成一次真实模型请求。
 
 ```mermaid
@@ -196,7 +198,7 @@ if (choice.finish_reason) {
 
 ## 5. 运行一次真实请求
 
-完整程序在 `labs/03-bailian-provider.ts`。在项目根目录的 `.env` 中填写：
+完整程序在 labs/03-bailian-provider.ts。在项目根目录的 `.env` 中填写：
 
 ```dotenv
 DASHSCOPE_API_KEY=你的百炼_API_Key
@@ -213,12 +215,12 @@ node labs/03-bailian-provider.ts
 模型回复内容每次可能不同，成功输出的结构如下：
 
 ```text
+input: Reply with a short greeting.
 qwen3.8-flash: <模型回复>
 tokens: input=<输入 token>, output=<输出 token>, total=<总 token>
-chapter 3 real call passed
 ```
 
-Lab 直接调用 pi 的 `models.complete()`。它断言回复文本非空，并且数据流以 `stop` 或 `length` 结束；认证失败、模型不可用、网络错误或不完整的数据流都会使进程以错误退出。
+Lab 直接调用 pi 的 `models.complete()`，打印模型问候语和 token 用量。看到实际回复即可观察接入结果；请求失败或中止时，程序会显示错误。
 
 ## 6. 数据流必须有明确的结束原因
 

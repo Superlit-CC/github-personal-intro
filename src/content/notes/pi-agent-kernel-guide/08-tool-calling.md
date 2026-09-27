@@ -12,6 +12,8 @@ series:
   order: 8
 ---
 
+> 上一章：[保存消息并连续对话](../07-conversation-history/) · 下一章：[工具如何完成实际操作](../09-tool-implementation/) · 系列导读：[从一次模型调用到 Agent 内核](../00-overview/)
+
 上一章的 Agent 可以利用历史继续回答，但遇到需要获取外部信息或执行操作的问题时，还无法调用程序完成任务。本章增加工具调用能力：模型提出调用请求，Agent 执行对应工具，把结果交回模型继续处理。调用方仍然只提交一次 `prompt()`。
 
 ```mermaid
@@ -324,7 +326,7 @@ while (hasMoreToolCalls) {
 
 ## 4. 运行 Lab，检查工具是否真的参与了回答
 
-完整程序在 `labs/08-tool-calling.ts`。它用原生 `read` 验证同一条通用路径：注册工具、接收调用、执行并保存结果，再发起模型请求。百炼配置和请求记录沿用第七章，输出关注工具参数、执行结果和最终回答。
+完整程序在 labs/08-tool-calling.ts。它配置原生 `read`，让模型读取文件，再打印工具结果与模型回答。
 
 沿用前文的 `.env` 和两个直接依赖 `@earendil-works/pi-ai`、`@earendil-works/pi-agent-core`，在项目根目录安装并运行：
 
@@ -333,34 +335,16 @@ npm install
 node labs/08-tool-calling.ts
 ```
 
-Lab 在临时目录创建 `note.txt`，写入随机生成的验证代号，并将原生工具的工作目录设为该目录。请求中只给出文件名，模型必须读取文件才能得到代号；结束后 Lab 清理临时目录。下面是一次真实调用的输出，后续运行的代号会变化：
+Lab 在临时目录创建 `note.txt`，写入随机生成的验证代号，并将原生工具的工作目录设为该目录。请求中只给出文件名，模型需要读取文件才能得到代号；结束后 Lab 清理临时目录。预期输出如下，代号每次不同：
 
 ```text
-model: qwen3.8-flash
+file content: 本次验证代号：read-643219
 input: 请用 read 读取 note.txt，只回复其中的验证代号。
-request 1 roles: user
-assistant stopReason: toolUse
-tool_execution_start: read
-read args: {"path":"note.txt"}
-tool_execution_end: read
 read result: 本次验证代号：read-643219
-request 2 roles: user -> assistant -> toolResult
-assistant stopReason: stop
 final answer: read-643219
-history roles: user -> assistant -> toolResult -> assistant
-chapter 8 native read tool passed
 ```
 
-`tool_execution_start` 和 `tool_execution_end` 是 Agent 通知工具执行过程的事件。这里用它们显示过程；工具结果进入历史，仍依靠后面的 `message_end`。
-
-程序检查四组事实：
-
-1. 一次 `prompt()` 恰好发出两次模型请求，两次都携带工具说明；第二次请求包含完整的调用消息和结果消息。
-2. 只出现一次 `read` 执行的开始与结束事件，模型请求的文件是 `note.txt`；结果消息的 `toolCallId` 与调用 ID 相同，`isError` 为 `false`，返回文本与写入文件的内容完全一致。
-3. 先保存工具调用消息，再执行工具、保存工具结果，最后保存回答；历史恰好包含四条消息。
-4. 最终回复正常结束、没有继续请求工具，文字等于工具读出的验证代号。
-
-这些断言同时验证工具确实执行、结果进入后续请求，以及模型依据结果完成回答。两次模型请求是这个示例的预期过程。
+`read result` 在 `tool_execution_end` 事件到来时打印，展示工具执行后得到的内容。将它与文件内容、`final answer` 对照，就能观察文件读取如何支持模型回答。请求失败或中止时，程序会显示错误。
 
 ## 5. 本章小结
 

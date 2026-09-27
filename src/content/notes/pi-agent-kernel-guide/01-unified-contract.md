@@ -11,14 +11,14 @@ series:
   order: 1
 ---
 
+> 系列导读：[从一次模型调用到 Agent 内核](../00-overview/) · 下一章：[选择并调用不同模型服务](../02-provider-routing/)
+
 本章只完成一件事：通过 `models.complete()` 提交固定结构的输入，并得到固定结构的回复。完成后，调用方只需要认识 `Model`、`Context` 和 `AssistantMessage`。
 
 ## 总览：一次调用有哪些输入和输出
 
 ```mermaid
 flowchart LR
-    accTitle: 一次模型调用的输入与输出
-    accDescr: 用户输入进入 Context，Model 与 Context 交给 models.complete()，返回 AssistantMessage。
     User["用户输入"] --> Context["Context<br/>本次发送的内容"]
     Model["Model<br/>本次调用的模型"] --> Call["models.complete()"]
     Context --> Call
@@ -135,7 +135,7 @@ AssistantMessage(demo-model: hello)
 
 ## 6. 运行本章示例
 
-完整程序在 `labs/01-model-call.ts`。运行：
+完整程序在 labs/01-model-call.ts。运行：
 
 ```bash
 node labs/01-model-call.ts
@@ -144,11 +144,11 @@ node labs/01-model-call.ts
 预期输出：
 
 ```text
+input: hello
 demo-model: hello
-chapter 1 example passed
 ```
 
-示例断言模型和用户消息都进入了回复，并确认调用以 `stop` 正常结束。
+对照输入与回复，可以看到 `demo-model: hello` 同时包含模型名称和用户输入。
 
 ## 7. 本章小结
 
@@ -161,4 +161,3 @@ chapter 1 example passed
 调用方把这三项数据交给 `models.complete()`，不直接处理模型服务的接入细节。
 
 对应源码：[`models.ts`](https://github.com/earendil-works/pi/blob/main/packages/ai/src/models.ts)、[`types.ts`](https://github.com/earendil-works/pi/blob/main/packages/ai/src/types.ts)。
-

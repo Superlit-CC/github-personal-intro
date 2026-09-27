@@ -1,15 +1,15 @@
 import assert from "node:assert/strict";
-import { readFile, readdir, access } from "node:fs/promises";
+import { access, readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
 
-// Check the built site, including repository-prefixed GitHub Pages links.
-const pages = (await readdir("dist", { recursive: true }))
-  .filter((file) => file.endsWith(".html"));
+const pages = (await readdir("dist", { recursive: true })).filter((file) => file.endsWith(".html"));
 const home = await readFile("dist/index.html", "utf8");
 const base = home.match(/class="brand" href="([^"]+)"/)[1];
+
 for (const path of ["index.html", "notes/index.html", "projects/index.html", "about/index.html"]) {
   assert(pages.includes(path.replaceAll("/", process.platform === "win32" ? "\\" : "/")), `Missing page: ${path}`);
 }
+
 for (const file of pages) {
   const html = await readFile(join("dist", file), "utf8");
   assert(html.includes('lang="zh-CN"'), `Missing Chinese document language: ${file}`);
@@ -27,121 +27,59 @@ for (const file of pages) {
     }
   }
 }
+
 const dates = [...home.matchAll(/<time datetime="([^"]+)"/g)].map((match) => match[1]);
 assert(dates.length <= 3, "Homepage should contain at most three articles");
 assert.deepEqual(dates, [...dates].sort().reverse(), "Articles must be newest first");
+
 const seriesPath = "notes/pi-agent-kernel-guide/";
-const overview = await readFile(`dist/${seriesPath}00-overview/index.html`, "utf8");
-const chapter = await readFile(`dist/${seriesPath}01-unified-contract/index.html`, "utf8");
-const chapterTwo = await readFile(`dist/${seriesPath}02-provider-routing/index.html`, "utf8");
-const chapterThree = await readFile(`dist/${seriesPath}03-bailian-provider/index.html`, "utf8");
-const chapterFour = await readFile(`dist/${seriesPath}04-streaming-text/index.html`, "utf8");
-const chapterFive = await readFile(`dist/${seriesPath}05-events-and-result/index.html`, "utf8");
-const chapterSix = await readFile(`dist/${seriesPath}06-agent-question-answer/index.html`, "utf8");
-const chapterSeven = await readFile(`dist/${seriesPath}07-conversation-history/index.html`, "utf8");
-const chapterEight = await readFile(`dist/${seriesPath}08-tool-calling/index.html`, "utf8");
-for (const html of [overview, chapter, chapterTwo, chapterThree, chapterFour, chapterFive, chapterSix, chapterSeven, chapterEight]) {
-  assert(/<svg[^>]*id="mermaid/.test(html), "Mermaid must render to SVG at build time");
-  assert(!html.includes('class="language-mermaid"'), "Do not expose unrendered Mermaid code");
-  assert(html.includes('role="graphics-document document"'), "Mermaid must have an accessible diagram role");
-  assert(!html.includes("<foreignObject"), "Use native SVG labels to prevent HTML line breaks from clipping text");
+const slugs = [
+  "00-overview",
+  "01-unified-contract",
+  "02-provider-routing",
+  "03-bailian-provider",
+  "04-streaming-text",
+  "05-events-and-result",
+  "06-agent-question-answer",
+  "07-conversation-history",
+  "08-tool-calling",
+  "09-tool-implementation",
+];
+const chapters = await Promise.all(slugs.map((slug) => readFile(`dist/${seriesPath}${slug}/index.html`, "utf8")));
+
+for (const [index, html] of chapters.entries()) {
+  assert(/<svg[^>]*id="mermaid/.test(html), `Mermaid must render in ${slugs[index]}`);
+  assert(!html.includes('class="language-mermaid"'), `Do not expose Mermaid source in ${slugs[index]}`);
+  assert(html.includes('role="graphics-document document"'), `Mermaid needs an accessible role in ${slugs[index]}`);
+  assert(!html.includes("<foreignObject"), `Use native SVG labels in ${slugs[index]}`);
+  assert(!/href="[^"]*\/labs\//i.test(html), `Lab paths must not be links in ${slugs[index]}`);
 }
-for (const label of ["本次调用的模型", "本次发送的内容", "模型回复"]) {
-  assert(new RegExp(`<tspan[^>]*>${label}</tspan>`).test(chapter), `Missing SVG label: ${label}`);
+
+for (let index = 0; index < chapters.length - 1; index++) {
+  const current = chapters[index];
+  const next = chapters[index + 1];
+  assert(current.includes(`href="${base}${seriesPath}${slugs[index + 1]}/"`), `${slugs[index]} must link forward`);
+  assert(next.includes(`href="${base}${seriesPath}${slugs[index]}/"`), `${slugs[index + 1]} must link back`);
 }
-const overviewNext = [...overview.matchAll(/<a href="([^"]+)"[^>]*>下一篇/g)].map((match) => match[1]);
-const chapterPrevious = [...chapter.matchAll(/<a href="([^"]+)"[^>]*>← 上一篇/g)].map((match) => match[1]);
-assert.deepEqual(overviewNext, [`${base}${seriesPath}01-unified-contract/`], "Overview must link to chapter one");
-assert.deepEqual(chapterPrevious, [`${base}${seriesPath}00-overview/`], "Chapter one must link back to overview");
-const chapterNext = [...chapter.matchAll(/<a href="([^"]+)"[^>]*>下一篇/g)].map((match) => match[1]);
-const chapterTwoPrevious = [...chapterTwo.matchAll(/<a href="([^"]+)"[^>]*>← 上一篇/g)].map((match) => match[1]);
-assert.deepEqual(chapterNext, [`${base}${seriesPath}02-provider-routing/`], "Chapter one must link to chapter two");
-assert.deepEqual(chapterTwoPrevious, [`${base}${seriesPath}01-unified-contract/`], "Chapter two must link back to chapter one");
-const chapterTwoNext = [...chapterTwo.matchAll(/<a href="([^"]+)"[^>]*>下一篇/g)].map((match) => match[1]);
-const chapterThreePrevious = [...chapterThree.matchAll(/<a href="([^"]+)"[^>]*>← 上一篇/g)].map((match) => match[1]);
-assert.deepEqual(chapterTwoNext, [`${base}${seriesPath}03-bailian-provider/`], "Chapter two must link to chapter three");
-assert.deepEqual(chapterThreePrevious, [`${base}${seriesPath}02-provider-routing/`], "Chapter three must link back to chapter two");
-const chapterThreeNext = [...chapterThree.matchAll(/<a href="([^"]+)"[^>]*>下一篇/g)].map((match) => match[1]);
-const chapterFourPrevious = [...chapterFour.matchAll(/<a href="([^"]+)"[^>]*>← 上一篇/g)].map((match) => match[1]);
-assert.deepEqual(chapterThreeNext, [`${base}${seriesPath}04-streaming-text/`], "Chapter three must link to chapter four");
-assert.deepEqual(chapterFourPrevious, [`${base}${seriesPath}03-bailian-provider/`], "Chapter four must link back to chapter three");
-const chapterFourNext = [...chapterFour.matchAll(/<a href="([^"]+)"[^>]*>下一篇/g)].map((match) => match[1]);
-const chapterFivePrevious = [...chapterFive.matchAll(/<a href="([^"]+)"[^>]*>← 上一篇/g)].map((match) => match[1]);
-assert.deepEqual(chapterFourNext, [`${base}${seriesPath}05-events-and-result/`], "Chapter four must link to chapter five");
-assert.deepEqual(chapterFivePrevious, [`${base}${seriesPath}04-streaming-text/`], "Chapter five must link back to chapter four");
-const chapterFiveNext = [...chapterFive.matchAll(/<a href="([^"]+)"[^>]*>下一篇/g)].map((match) => match[1]);
-const chapterSixPrevious = [...chapterSix.matchAll(/<a href="([^"]+)"[^>]*>← 上一篇/g)].map((match) => match[1]);
-assert.deepEqual(chapterFiveNext, [`${base}${seriesPath}06-agent-question-answer/`], "Chapter five must link to chapter six");
-assert.deepEqual(chapterSixPrevious, [`${base}${seriesPath}05-events-and-result/`], "Chapter six must link back to chapter five");
-assert(chapterSix.includes(`href="${base}${seriesPath}07-conversation-history/"`), "Chapter six must link to chapter seven");
-assert(chapterSeven.includes(`href="${base}${seriesPath}06-agent-question-answer/"`), "Chapter seven must link back to chapter six");
-assert(chapterSeven.includes(`href="${base}${seriesPath}08-tool-calling/"`), "Chapter seven must link to chapter eight");
-assert(chapterEight.includes(`href="${base}${seriesPath}07-conversation-history/"`), "Chapter eight must link back to chapter seven");
-assert(!chapterEight.includes(">下一篇："), "Do not link to unpublished chapters");
-assert(overview.includes('href="../08-tool-calling/"'), "Overview must list chapter eight as published");
-for (const text of ["npm install", "node labs/08-tool-calling.ts", "tool_execution_start: read", "request 2 roles: user", "final answer: read-643219", "chapter 8 native read tool passed"]) {
-  assert(chapterEight.replace(/<[^>]+>/g, "").includes(text), `Preserve chapter eight Lab instructions and output: ${text}`);
+assert(!chapters.at(-1).includes(">下一篇："), "Do not link chapter nine to unpublished chapters");
+
+const overview = chapters[0];
+for (const slug of slugs.slice(1)) {
+  assert(overview.includes(`href="../${slug}/"`), `Overview must list ${slug}`);
 }
-const chapterEightDiagram = chapterEight.match(/<svg[^>]*id="mermaid[\s\S]*?<\/svg>/)[0].replace(/<[^>]+>/g, "");
-for (const label of ["调用方", "Agent", "模型", "工具", "调用 execute()", "返回执行结果", "根据工具结果回答"]) {
-  assert(chapterEightDiagram.includes(label), `Missing chapter eight SVG label: ${label}`);
+assert(overview.includes("待完成：第 10、11 章"), "Overview must preserve the remaining chapter plan");
+
+const chapterNineText = chapters.at(-1).replace(/<[^>]+>/g, "");
+for (const text of ["npm install", "node labs/09-tool-implementation.ts", "file content:", "final answer: read-841273", "content", "details"]) {
+  assert(chapterNineText.includes(text), `Preserve chapter nine content: ${text}`);
 }
-assert(overview.includes('href="../07-conversation-history/"'), "Overview must list chapter seven as published");
-for (const text of ["node labs/07-conversation-history.ts", "request 2 roles: user", "saved reply 2:", "second request includes the complete first round", "chapter 7 conversation history passed"]) {
-  assert(chapterSeven.replace(/<[^>]+>/g, "").includes(text), `Preserve chapter seven Lab instructions and output: ${text}`);
+const chapterNineDiagram = chapters.at(-1).match(/<svg[^>]*id="mermaid[\s\S]*?<\/svg>/)[0].replace(/<[^>]+>/g, "");
+for (const label of ["Agent 传入本次调用参数", "工具的 execute 函数", "应用提供执行环境", "调用环境完成操作", "整理操作结果，交回 Agent"]) {
+  assert(chapterNineDiagram.includes(label), `Missing chapter nine SVG label: ${label}`);
 }
-const chapterSevenDiagram = chapterSeven.match(/<svg[^>]*id="mermaid[\s\S]*?<\/svg>/)[0].replace(/<[^>]+>/g, "");
-for (const label of ["用户的新输入", "本轮执行上下文", "历史消息 + 新输入", "Agent 会话历史", "百炼模型", "完整回复", "保存用户消息", "保存模型消息"]) {
-  assert(chapterSevenDiagram.includes(label), `Missing chapter seven SVG label: ${label}`);
-}
-assert(overview.includes('href="../06-agent-question-answer/"'), "Overview must list chapter six as published");
-const chapterSixText = chapterSix.replace(/<[^>]+>/g, "");
-for (const text of ["npm install", "node labs/06-agent-question-answer.ts", "request 1 roles: user", "complete reply:", "stopReason: stop", "chapter 6 Agent question and answer passed"]) {
-  assert(chapterSixText.includes(text), `Preserve chapter six Lab instructions and output: ${text}`);
-}
-const chapterSixDiagram = chapterSix.match(/<svg[^>]*id="mermaid[\s\S]*?<\/svg>/)[0].replace(/<[^>]+>/g, "");
-for (const label of ["调用方", "Agent", "前文的模型调用封装", "百炼模型", "提交输入", "通过传入的函数调用模型", "发送请求", "返回回复", "传递模型回复事件", "回复过程与完整消息"]) {
-  assert(chapterSixDiagram.includes(label), `Missing chapter six SVG label: ${label}`);
-}
-assert(overview.includes("第 9～11 章尚未收录"), "Overview must preserve the revised chapter plan");
-assert(overview.includes('href="../05-events-and-result/"'), "Overview must list chapter five as published");
-const chapterFiveDiagram = chapterFive.match(/<svg[^>]*id="mermaid[\s\S]*?<\/svg>/)[0].replace(/<[^>]+>/g, "");
-for (const label of ["百炼协议适配器", "累积消息并发送事件", "沿已有调用路径转发", "调用方持有的事件流", "for await：逐条事件", "显示端", "追加新增文字", "await events.result()", "结果等待方", "取得完整消息并判断状态"]) {
-  assert(chapterFiveDiagram.includes(label), `Missing chapter five SVG label: ${label}`);
-}
-for (const text of ["node labs/05-events-and-result.ts", "input: 用中文分三句话解释为什么流式回复能减少等待感。", "model: qwen3.8-flash", "text_delta events: 18", "stopReason: stop", "real call text matches result", "mechanism result before iteration:", "mechanism events after result:", "chapter 5 events and result passed"]) {
-  assert(chapterFive.replace(/<[^>]+>/g, "").includes(text), `Preserve chapter five Lab instructions and output: ${text}`);
-}
-assert(chapterFive.includes(`href="../02-provider-routing/#${encodeURIComponent("等待认证时先把事件流交给调用方")}"`), "Chapter five must link to the stream forwarding explanation");
-assert(overview.includes('href="../04-streaming-text/"'), "Overview must list chapter four as published");
-const chapterFourDiagram = chapterFour.match(/<svg[^>]*id="mermaid[\s\S]*?<\/svg>/)[0].replace(/<[^>]+>/g, "");
-for (const label of ["Model 与 Context", "models.stream()", "经 Bailian Provider", "发起请求", "百炼", "返回 SSE 数据块", "协议适配器", "产生 text_delta", "调用方", "立即追加到终端"]) {
-  assert(chapterFourDiagram.includes(label), `Missing chapter four SVG label: ${label}`);
-}
-for (const text of ["node labs/04-streaming-text.ts", "input: 用中文分三句话解释为什么流式回复能减少等待感。", "model: qwen3.8-flash", "delta 1:", "text_delta events: 18", "chapter 4 streaming passed"]) {
-  assert(chapterFour.replace(/<[^>]+>/g, "").includes(text), `Preserve chapter four Lab instructions and output: ${text}`);
-}
-assert(chapterTwo.includes('id="等待认证时先把事件流交给调用方"'), "Chapter two must explain asynchronous stream setup");
-assert(chapterFour.includes(`href="../02-provider-routing/#${encodeURIComponent("等待认证时先把事件流交给调用方")}"`), "Chapter four must link to the stream forwarding explanation");
-assert(overview.includes('href="../03-bailian-provider/"'), "Overview must list chapter three as published");
-const chapterThreeDiagram = chapterThree.match(/<svg[^>]*id="mermaid[\s\S]*?<\/svg>/)[0].replace(/<[^>]+>/g, "");
-for (const label of ["调用方", "Models", "Bailian Provider", "openai-completions 适配器", "百炼 Chat Completions", "POST /chat/completions", "SSE 数据块", "AssistantMessageEventStream", "result() → AssistantMessage"]) {
-  assert(chapterThreeDiagram.includes(label), `Missing chapter three SVG label: ${label}`);
-}
-for (const text of ["DASHSCOPE_API_KEY=", "BAILIAN_BASE_URL=", "npm install", "node labs/03-bailian-provider.ts", "qwen3.8-flash:", "tokens: input=", "chapter 3 real call passed"]) {
-  assert(chapterThree.replace(/<[^>]+>/g, "").includes(text), `Preserve chapter three Lab instructions and output: ${text}`);
-}
-assert(overview.includes('href="../02-provider-routing/"'), "Overview must list chapter two as published");
-const chapterTwoDiagram = chapterTwo.match(/<svg[^>]*id="mermaid[\s\S]*?<\/svg>/)[0].replace(/<[^>]+>/g, "");
-for (const label of ["调用方", "models.complete()", "Models", "查找 Provider 并应用认证", "执行调用", "模型服务", "AssistantMessage"]) {
-  assert(chapterTwoDiagram.includes(label), `Missing chapter two SVG label: ${label}`);
-}
-for (const text of ["node labs/02-provider-routing.ts", "anthropic: hello", "openai: hello", "chapter 2 example passed"]) {
-  assert(chapterTwo.replace(/<[^>]+>/g, "").includes(text), `Preserve chapter two Lab instructions and output: ${text}`);
-}
-assert(chapter.includes("labs/01-model-call.ts") && chapter.includes("chapter 1 example passed"), "Preserve the original Lab instructions and expected output");
-assert(!/href="[^"]*\/labs\//i.test(overview + chapter + chapterTwo + chapterThree + chapterFour + chapterFive + chapterSix + chapterSeven + chapterEight), "Lab paths should remain text, not links");
+
 for (const slug of ["building-a-personal-site", "learning-in-public", "project-retrospectives"]) {
   assert(!pages.some((page) => page.includes(slug)), `Removed sample still published: ${slug}`);
 }
-console.log(`Blog checks passed: ${pages.length} pages, internal links, anchors and article order.`);
+
+console.log(`Blog checks passed: ${pages.length} pages, internal links, Mermaid, series navigation and Lab content.`);

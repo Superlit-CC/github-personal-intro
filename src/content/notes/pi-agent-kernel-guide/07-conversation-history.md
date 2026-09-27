@@ -11,6 +11,7 @@ series:
   name: "从零构建 Agent"
   order: 7
 ---
+> 上一章：[让 Agent 完成一次问答](../06-agent-question-answer/) · 下一章：[让 Agent 调用工具](../08-tool-calling/) · 系列导读：[从一次模型调用到 Agent 内核](../00-overview/)
 
 上一章已经用 Agent 完成一次流式问答。现在继续向同一个 Agent 提交第二条输入，让模型依据第一轮内容回答新问题。本章解释第一轮消息怎样保存、怎样进入第二次请求，以及新回复怎样再次留下来。
 
@@ -215,7 +216,7 @@ return finalMessage;
 
 ## 4. 运行 Lab，检查第二次请求带上了什么
 
-完整程序在 `labs/07-conversation-history.ts`。它保留第六章的百炼配置、Agent 创建方式和事件回调，把输入放进一个数组，按顺序执行两次 `prompt()`。每轮结束后，既取得回调交付的完整回复，也检查 Agent 保存的消息。
+完整程序在 labs/07-conversation-history.ts。它沿用第六章的百炼配置和 Agent 创建方式，向同一个 Agent 连续提交两条输入，每轮结束后打印回答和历史消息角色。
 
 为使第二轮回答可核对，Lab 每次生成不同的代号，第二条输入不包含代号。
 
@@ -225,33 +226,22 @@ return finalMessage;
 node labs/07-conversation-history.ts
 ```
 
-Lab 在 `streamFn` 中记录发送前的消息副本，然后继续调用真实百炼服务。副本仅供断言使用，请求中的消息仍由 Agent 自己组装。
-
-下面节选一次成功运行的输出，省略逐段打印的 `delta`，突出请求和历史的变化；实际运行仍会显示所有分片：
+Lab 在 `streamFn` 中直接打印本次请求的消息角色，然后继续调用真实百炼服务。下面是预期输出，代号每次不同：
 
 ```text
-model: qwen3.8-flash
-input 1: 请记住本次会话的代号是 松风-485111。只回复这个代号。
-request 1 roles: user
-saved reply 1: "松风-485111"
+input: 请记住本次会话的代号是 松风-485111。只回复这个代号。
+request roles: user
+saved reply: 松风-485111
 history roles: user -> assistant
-input 2: 我刚才让你记住的代号是什么？只回复代号。
-request 2 roles: user -> assistant -> user
-saved reply 2: "松风-485111"
+input: 我刚才让你记住的代号是什么？只回复代号。
+request roles: user -> assistant -> user
+saved reply: 松风-485111
 history roles: user -> assistant -> user -> assistant
-second request includes the complete first round
-chapter 7 conversation history passed
 ```
 
-程序检查三件事：
+观察第二次的 `request roles`，可以看到请求带上了前一轮的一问一答和新输入；再对照第二轮回答与第一条输入中的代号，观察模型是否使用了历史。每轮后的 `history roles` 展示 Agent 中保存的消息角色。
 
-1. 第二次请求恰好包含第一轮完整的一问一答和第二条用户消息，顺序与内容都一致。
-2. 分片到来时历史条数不增长；每轮结束后只新增一条用户消息和一条完整回复，保存的回复与结束事件交付的消息一致。
-3. 显示分片拼接后与完整回复一致，第二轮模型只回答准确代号，两次调用都正常结束。
-
-请求内容的断言验证历史是否传递，回答的断言验证模型是否按要求使用了历史。不能仅凭模型答对就推断保存正确；任一断言失败，程序都会报错并以非零退出码结束。
-
-这些消息保存在当前 Agent 的内存数组中，进程退出后不会自动保留。
+这些输出用于观察本次对话过程；请求失败或中止时，程序会显示错误。消息保存在当前 Agent 的内存数组中，进程退出后不会自动保留。
 
 ## 5. 本章小结
 

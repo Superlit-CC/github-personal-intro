@@ -12,6 +12,8 @@ series:
   order: 6
 ---
 
+> 上一章：[让事件流同时提供过程和结果](../05-events-and-result/) · 下一章：[保存消息并连续对话](../07-conversation-history/) · 系列导读：[从一次模型调用到 Agent 内核](../00-overview/)
+
 上一章的调用方直接组装 `Context`、读取模型事件流并等待完整结果。现在把一次问答交给 Agent：调用方提交一条输入，通过事件显示分片并取得完整回复，模型请求仍使用前文已经配置好的百炼调用。
 
 ```mermaid
@@ -44,7 +46,7 @@ Agent 位于调用方和模型调用封装之间。它负责组织这次处理�
 
 ## 2. 用已有百炼配置完成一次流式问答
 
-沿用第五章的 `models` 和 `model`，先注册接收事件的回调，再调用 `prompt()` 提交输入。完整百炼配置和断言放在 Lab 中：
+沿用第五章的 `models` 和 `model`，先注册接收事件的回调，再调用 `prompt()` 提交输入。完整百炼配置和可运行代码放在 Lab 中：
 
 ```ts
 import { Agent } from "@earendil-works/pi-agent-core";
@@ -252,7 +254,7 @@ for (const listener of this.listeners) {
 
 ## 4. 运行 Lab，核对一次请求的过程和结果
 
-完整程序在 `labs/06-agent-question-answer.ts`。沿用第三章的 `.env` 配置，在项目根目录运行：
+完整程序在 labs/06-agent-question-answer.ts。沿用第三章的 `.env` 配置，在项目根目录运行：
 
 ```bash
 npm install
@@ -265,20 +267,15 @@ node labs/06-agent-question-answer.ts
 请只回复：你好，Agent。
 ```
 
-输出包含请求中的消息角色、逐次到达的分片和结束事件交付的完整回复。下面是一次成功运行的输出，分片边界会随运行变化：
+运行时先看到逐步出现的 `stream reply`，随后看到结束事件交付的完整回复：
 
 ```text
-model: qwen3.8-flash
 input: 请只回复：你好，Agent。
-request 1 roles: user
-delta: "你好"
-delta: "，Agent。"
-complete reply: "你好，Agent。"
-stopReason: stop
-chapter 6 Agent question and answer passed
+stream reply: 你好，Agent。
+complete reply: 你好，Agent。
 ```
 
-Lab 验证一次 `prompt()` 只发出一次模型请求，结束事件提供正常完成的指定问候语，并且显示的分片拼接后与完整回复一致。任何一项不满足，程序都会报错并以非零退出码结束。
+对照输入、流式显示和完整回复，可以观察 `prompt()` 如何通过 Agent 事件把模型回答交给调用方。请求失败或中止时，程序会显示错误。
 
 ## 5. 本章小结
 

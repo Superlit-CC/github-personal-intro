@@ -11,6 +11,8 @@ series:
   order: 2
 ---
 
+> 上一章：[定义一次模型调用](../01-unified-contract/) · 系列导读：[从一次模型调用到 Agent 内核](../00-overview/) · 下一章：[接入阿里云百炼](../03-bailian-provider/)
+
 上一章固定了 `models.complete(model, context)` 的调用方式。本章增加第二个能力：切换模型时，上层代码不需要出现 Anthropic、OpenAI 等服务分支。
 
 pi 把一个模型服务的模型目录、认证规则和调用能力封装成 Provider。本文第一次出现 Provider 时，只需要把它理解为“某个模型服务的接入对象”。
@@ -178,7 +180,7 @@ const openaiReply = await models.complete(openaiModel, context);
 
 ## 5. 运行本章示例
 
-完整程序在 `labs/02-provider-routing.ts`。它注册两个教学用 Provider，并通过同一个 `models.complete()` 入口调用它们：
+完整程序在 labs/02-provider-routing.ts。它注册两个教学用 Provider，并通过同一个 `models.complete()` 入口调用它们：
 
 ```bash
 node labs/02-provider-routing.ts
@@ -187,12 +189,12 @@ node labs/02-provider-routing.ts
 预期输出：
 
 ```text
+input: hello
 anthropic: hello
 openai: hello
-chapter 2 example passed
 ```
 
-示例只验证 `model.provider` 如何选择 Provider。Provider 返回固定消息，因此运行时不需要密钥或网络连接。
+对照两行回复，可以看到同一个 `hello` 分别交给了 `anthropic` 和 `openai` Provider。Provider 返回固定消息，因此运行时不需要密钥或网络连接。
 
 ## 6. 本章小结
 
