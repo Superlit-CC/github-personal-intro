@@ -64,7 +64,7 @@ flowchart LR
 
 | 章 | 本章只解决什么 | 学完可以做什么 |
 |---|---|---|
-| 10. 保存并恢复会话 | 将会话消息保存到磁盘并重新加载 | 进程重启后，基于已保存的消息继续对话 |
+| [10. 保存并恢复会话](../10-session-persistence/) | 将会话消息保存到磁盘并重新加载 | 进程重启后，基于已保存的消息继续对话 |
 | 11. 压缩过长的上下文 | 将较早的历史整理为摘要，缩短后续请求 | 保留继续任务所需的关键信息，为新消息腾出空间 |
 
 读完这一阶段，你可以恢复已保存的会话，并在历史过长时用摘要缩短上下文，让 Agent 基于保留的信息继续处理任务。
@@ -83,7 +83,7 @@ flowchart LR
 
 ## 当前进度
 
-- 已完成：[第 1 章](../01-unified-contract/)、[第 2 章](../02-provider-routing/)、[第 3 章](../03-bailian-provider/)、[第 4 章](../04-streaming-text/)、[第 5 章](../05-events-and-result/)、[第 6 章](../06-agent-question-answer/)、[第 7 章](../07-conversation-history/)、[第 8 章](../08-tool-calling/)、[第 9 章](../09-tool-implementation/)
-- 待完成：第 10、11 章
+- 已完成：[第 1 章](../01-unified-contract/)、[第 2 章](../02-provider-routing/)、[第 3 章](../03-bailian-provider/)、[第 4 章](../04-streaming-text/)、[第 5 章](../05-events-and-result/)、[第 6 章](../06-agent-question-answer/)、[第 7 章](../07-conversation-history/)、[第 8 章](../08-tool-calling/)、[第 9 章](../09-tool-implementation/)、[第 10 章](../10-session-persistence/)
+- 待完成：第 11 章
 
-当前可按 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 阅读。
+当前可按 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 阅读。

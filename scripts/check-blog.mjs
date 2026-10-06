@@ -44,6 +44,7 @@ const slugs = [
   "07-conversation-history",
   "08-tool-calling",
   "09-tool-implementation",
+  "10-session-persistence",
 ];
 const chapters = await Promise.all(slugs.map((slug) => readFile(`dist/${seriesPath}${slug}/index.html`, "utf8")));
 
@@ -61,25 +62,35 @@ for (let index = 0; index < chapters.length - 1; index++) {
   assert(current.includes(`href="${base}${seriesPath}${slugs[index + 1]}/"`), `${slugs[index]} must link forward`);
   assert(next.includes(`href="${base}${seriesPath}${slugs[index]}/"`), `${slugs[index + 1]} must link back`);
 }
-assert(!chapters.at(-1).includes(">下一篇："), "Do not link chapter nine to unpublished chapters");
+assert(!chapters.at(-1).includes(">下一篇："), "Do not link chapter ten to unpublished chapters");
 
 const overview = chapters[0];
 for (const slug of slugs.slice(1)) {
   assert(overview.includes(`href="../${slug}/"`), `Overview must list ${slug}`);
 }
-assert(overview.includes("待完成：第 10、11 章"), "Overview must preserve the remaining chapter plan");
+assert(overview.includes("待完成：第 11 章"), "Overview must preserve the remaining chapter plan");
 
-const chapterNineText = chapters.at(-1).replace(/<[^>]+>/g, "");
+const chapterNineText = chapters[9].replace(/<[^>]+>/g, "");
 for (const text of ["npm install", "node labs/09-tool-implementation.ts", "file content:", "final answer: read-841273", "content", "details"]) {
   assert(chapterNineText.includes(text), `Preserve chapter nine content: ${text}`);
 }
-const chapterNineDiagram = chapters.at(-1).match(/<svg[^>]*id="mermaid[\s\S]*?<\/svg>/)[0].replace(/<[^>]+>/g, "");
+const chapterNineDiagram = chapters[9].match(/<svg[^>]*id="mermaid[\s\S]*?<\/svg>/)[0].replace(/<[^>]+>/g, "");
 for (const label of ["Agent 传入本次调用参数", "工具的 execute 函数", "应用提供执行环境", "调用环境完成操作", "整理操作结果，交回 Agent"]) {
   assert(chapterNineDiagram.includes(label), `Missing chapter nine SVG label: ${label}`);
 }
 
 for (const slug of ["building-a-personal-site", "learning-in-public", "project-retrospectives"]) {
   assert(!pages.some((page) => page.includes(slug)), `Removed sample still published: ${slug}`);
+}
+
+
+const chapterTenText = chapters[10].replace(/<[^>]+>/g, "");
+for (const text of ["node labs/10-session-persistence.ts", "phase: save", "phase: resume", "source file exists: false", "restored roles:", "final answer: read-841273", "JsonlSessionRepo", "buildSessionContext"]) {
+  assert(chapterTenText.includes(text), `Preserve chapter ten content: ${text}`);
+}
+const chapterTenDiagram = chapters[10].match(/<svg[^>]*id="mermaid[\s\S]*?<\/svg>/)[0].replace(/<[^>]+>/g, "");
+for (const label of ["已有会话消息", "保存到磁盘文件", "程序重启后读取文件", "恢复会话消息", "带上历史继续提问"]) {
+  assert(chapterTenDiagram.includes(label), `Missing chapter ten SVG label: ${label}`);
 }
 
 console.log(`Blog checks passed: ${pages.length} pages, internal links, Mermaid, series navigation and Lab content.`);
